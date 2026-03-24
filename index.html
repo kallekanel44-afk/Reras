@@ -273,3 +273,106 @@ animate();
 
 </body>
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D City Destruction</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+<script>
+// Scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x222222);
+
+// Camera
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 5, 10);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Light
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(10, 20, 10);
+scene.add(light);
+
+// Ground
+const ground = new THREE.Mesh(
+    new THREE.BoxGeometry(50, 1, 50),
+    new THREE.MeshStandardMaterial({ color: "green" })
+);
+ground.position.y = -0.5;
+scene.add(ground);
+
+// Create buildings
+let buildings = [];
+
+for (let i = 0; i < 50; i++) {
+    let height = Math.random() * 5 + 2;
+
+    let building = new THREE.Mesh(
+        new THREE.BoxGeometry(2, height, 2),
+        new THREE.MeshStandardMaterial({ color: "grey" })
+    );
+
+    building.position.set(
+        (Math.random() - 0.5) * 40,
+        height / 2,
+        (Math.random() - 0.5) * 40
+    );
+
+    scene.add(building);
+    buildings.push(building);
+}
+
+// Movement
+let keys = {};
+let speed = 0.2;
+
+window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+// Mouse click (destroy)
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener("click", (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(buildings);
+
+    if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        scene.remove(obj);
+        buildings = buildings.filter(b => b !== obj);
+    }
+});
+
+// Game loop
+function animate() {
+    requestAnimationFrame(animate);
+
+    // WASD movement
+    if (keys["s"]) camera.position.z -= speed;
+    if (keys["w"]) camera.position.z += speed;
+    if (keys["d"]) camera.position.x -= speed;
+    if (keys["a"]) camera.position.x += speed;
+
+    renderer.render(scene, camera);
+}
+
+animate();
+</script>
+
+</body>
+</html>
