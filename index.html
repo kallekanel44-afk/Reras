@@ -1,1 +1,45 @@
+import pygame
+import sys
 
+# Initialize
+pygame.init()
+
+# Screen setup
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("WASD Movement")
+
+# Player setup
+player_size = 50
+player_x = WIDTH // 2
+player_y = HEIGHT // 2
+speed = 5
+
+clock = pygame.time.Clock()
+
+# Game loop
+while True:
+    screen.fill((30, 30, 30))  # background color
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Key input
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_w]:
+        player_y -= speed
+    if keys[pygame.K_s]:
+        player_y += speed
+    if keys[pygame.K_a]:
+        player_x -= speed
+    if keys[pygame.K_d]:
+        player_x += speed
+
+    # Draw player
+    pygame.draw.rect(screen, (0, 200, 255), (player_x, player_y, player_size, player_size))
+
+    pygame.display.flip()
+    clock.tick(60)
