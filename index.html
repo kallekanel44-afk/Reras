@@ -1,282 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WASD Movement</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #222; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-
-<canvas id="gameCanvas"></canvas>
-
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-// Resize canvas
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// Player
-let player = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    size: 40,
-    speed: 5
-};
-
-// Key tracking
-let keys = {};
-
-window.addEventListener("keydown", (e) => {
-    keys[e.key.toLowerCase()] = true;
-});
-
-window.addEventListener("keyup", (e) => {
-    keys[e.key.toLowerCase()] = false;
-});
-
-// Game loop
-function update() {
-    // Movement
-    if (keys["w"]) player.y -= player.speed;
-    if (keys["s"]) player.y += player.speed;
-    if (keys["a"]) player.x -= player.speed;
-    if (keys["d"]) player.x += player.speed;
-
-    // Clear screen
-    ctx.fillStyle = "#222";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw player
-    ctx.fillStyle = "#00ccff";
-    ctx.fillRect(player.x, player.y, player.size, player.size);
-
-    requestAnimationFrame(update);
-}
-
-update();
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html>
-<head>
-    <title>Platform Collision</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #222; }
-        canvas { display: block; }
-    </style>
-</head>
-<body>
-
-<canvas id="gameCanvas"></canvas>
-
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// Player
-let player = {
-    x: 100,
-    y: 100,
-    width: 40,
-    height: 40,
-    speed: 5,
-    dy: 0,          // vertical velocity
-    gravity: 0.5,
-    jumpPower: -10,
-    onGround: false
-};
-
-// Platform
-let platform = {
-    x: 200,
-    y: 400,
-    width: 300,
-    height: 20
-};
-
-// Keys
-let keys = {};
-
-window.addEventListener("keydown", (e) => {
-    keys[e.key.toLowerCase()] = true;
-});
-
-window.addEventListener("keyup", (e) => {
-    keys[e.key.toLowerCase()] = false;
-});
-
-// Game loop
-function update() {
-    // Horizontal movement
-    if (keys["a"]) player.x -= player.speed;
-    if (keys["d"]) player.x += player.speed;
-
-    // Jump
-    if (keys["w"] && player.onGround) {
-        player.dy = player.jumpPower;
-        player.onGround = false;
-    }
-
-    // Apply gravity
-    player.dy += player.gravity;
-    player.y += player.dy;
-
-    // Collision with platform
-    player.onGround = false;
-
-    if (
-        player.x < platform.x + platform.width &&
-        player.x + player.width > platform.x &&
-        player.y < platform.y + platform.height &&
-        player.y + player.height > platform.y
-    ) {
-        // Check if falling onto platform
-        if (player.dy > 0) {
-            player.y = platform.y - player.height;
-            player.dy = 0;
-            player.onGround = true;
-        }
-    }
-
-    // Floor (bottom of screen)
-    if (player.y + player.height > canvas.height) {
-        player.y = canvas.height - player.height;
-        player.dy = 0;
-        player.onGround = true;
-    }
-
-    // Draw
-    ctx.fillStyle = "#222";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Platform (grey)
-    ctx.fillStyle = "grey";
-    ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-
-    // Player
-    ctx.fillStyle = "#00ccff";
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-
-    requestAnimationFrame(update);
-}
-
-update();
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>3D WASD</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-    </style>
-</head>
-<body>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-
-<script>
-// Scene setup
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222222);
-
-// Camera
-const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-);
-camera.position.set(0, 5, 10);
-
-// Renderer
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-// Light
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(5, 10, 5);
-scene.add(light);
-
-// Platform (floor)
-const floorGeometry = new THREE.BoxGeometry(20, 1, 20);
-const floorMaterial = new THREE.MeshStandardMaterial({ color: "grey" });
-const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.position.y = -0.5;
-scene.add(floor);
-
-// Player (cube)
-const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
-const playerMaterial = new THREE.MeshStandardMaterial({ color: 0x00ccff });
-const player = new THREE.Mesh(playerGeometry, playerMaterial);
-player.position.y = 2;
-scene.add(player);
-
-// Movement
-let keys = {};
-let velocityY = 0;
-let gravity = -0.02;
-let onGround = false;
-let speed = 0.1;
-
-window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
-window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
-
-// Game loop
-function animate() {
-    requestAnimationFrame(animate);
-
-    // WASD movement (X/Z plane)
-    if (keys["w"]) player.position.z -= speed;
-    if (keys["s"]) player.position.z += speed;
-    if (keys["a"]) player.position.x -= speed;
-    if (keys["d"]) player.position.x += speed;
-
-    // Jump
-    if (keys["w"] && onGround) {
-        velocityY = 0.3;
-        onGround = false;
-    }
-
-    // Gravity
-    velocityY += gravity;
-    player.position.y += velocityY;
-
-    // Collision with floor
-    if (player.position.y <= 0.5) {
-        player.position.y = 0.5;
-        velocityY = 0;
-        onGround = true;
-    }
-
-    // Camera follows player
-    camera.position.x = player.position.x;
-    camera.position.z = player.position.z + 5;
-    camera.lookAt(player.position);
-
-    renderer.render(scene, camera);
-}
-
-animate();
-</script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>3D City Destruction</title>
+    <title>3D City Map</title>
     <style>
         body { margin: 0; overflow: hidden; }
     </style>
@@ -288,85 +13,122 @@ animate();
 <script>
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x222222);
+scene.background = new THREE.Color(0x87CEEB); // sky blue
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.set(0, 5, 10);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Light
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(10, 20, 10);
-scene.add(light);
+// Lighting
+const sun = new THREE.DirectionalLight(0xffffff, 1);
+sun.position.set(20, 50, 10);
+scene.add(sun);
+
+scene.add(new THREE.AmbientLight(0xaaaaaa));
 
 // Ground
 const ground = new THREE.Mesh(
-    new THREE.BoxGeometry(50, 1, 50),
-    new THREE.MeshStandardMaterial({ color: "green" })
+    new THREE.PlaneGeometry(200, 200),
+    new THREE.MeshStandardMaterial({ color: 0x228B22 })
 );
-ground.position.y = -0.5;
+ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Create buildings
-let buildings = [];
+// City generation
+const citySize = 10;
+const blockSize = 10;
+const roadWidth = 3;
 
-for (let i = 0; i < 50; i++) {
-    let height = Math.random() * 5 + 2;
+for (let x = -citySize; x < citySize; x++) {
+    for (let z = -citySize; z < citySize; z++) {
 
-    let building = new THREE.Mesh(
-        new THREE.BoxGeometry(2, height, 2),
-        new THREE.MeshStandardMaterial({ color: "grey" })
-    );
+        // ROAD (every 3rd block)
+        if (x % 3 === 0 || z % 3 === 0) {
+            const road = new THREE.Mesh(
+                new THREE.PlaneGeometry(blockSize, blockSize),
+                new THREE.MeshStandardMaterial({ color: 0x333333 })
+            );
 
-    building.position.set(
-        (Math.random() - 0.5) * 40,
-        height / 2,
-        (Math.random() - 0.5) * 40
-    );
+            road.rotation.x = -Math.PI / 2;
+            road.position.set(x * blockSize, 0.01, z * blockSize);
+            scene.add(road);
 
-    scene.add(building);
-    buildings.push(building);
+        } else {
+            // BUILDINGS
+            const height = Math.random() * 20 + 5;
+
+            const building = new THREE.Mesh(
+                new THREE.BoxGeometry(6, height, 6),
+                new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(`hsl(${Math.random()*360},30%,60%)`)
+                })
+            );
+
+            building.position.set(
+                x * blockSize,
+                height / 2,
+                z * blockSize
+            );
+
+            scene.add(building);
+        }
+    }
 }
+
+// Player
+const player = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshStandardMaterial({ color: 0x00ccff })
+);
+player.position.y = 2;
+scene.add(player);
 
 // Movement
 let keys = {};
+let velocityY = 0;
+let gravity = -0.02;
+let onGround = false;
 let speed = 0.2;
 
 window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 
-// Mouse click (destroy)
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-window.addEventListener("click", (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(buildings);
-
-    if (intersects.length > 0) {
-        let obj = intersects[0].object;
-        scene.remove(obj);
-        buildings = buildings.filter(b => b !== obj);
-    }
-});
-
 // Game loop
 function animate() {
     requestAnimationFrame(animate);
 
-    // WASD movement
-    if (keys["s"]) camera.position.z -= speed;
-    if (keys["w"]) camera.position.z += speed;
-    if (keys["d"]) camera.position.x -= speed;
-    if (keys["a"]) camera.position.x += speed;
+    // Movement
+    if (keys["w"]) player.position.z -= speed;
+    if (keys["s"]) player.position.z += speed;
+    if (keys["a"]) player.position.x -= speed;
+    if (keys["d"]) player.position.x += speed;
+
+    // Jump
+    if (keys[" "] && onGround) {
+        velocityY = 0.35;
+        onGround = false;
+    }
+
+    velocityY += gravity;
+    player.position.y += velocityY;
+
+    if (player.position.y <= 0.5) {
+        player.position.y = 0.5;
+        velocityY = 0;
+        onGround = true;
+    }
+
+    // Camera follow
+    camera.position.set(
+        player.position.x,
+        player.position.y + 6,
+        player.position.z + 10
+    );
+    camera.lookAt(player.position);
 
     renderer.render(scene, camera);
 }
